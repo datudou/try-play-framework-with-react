@@ -1,20 +1,45 @@
 package controllers
 
+import java.util.concurrent.TimeUnit
 import javax.inject._
 
+import actors.StatsActor
+import akka.actor.ActorSystem
+import akka.util.Timeout
+import akka.pattern.ask
 import play.api._
-import play.api.Play.current
-import model.SunInfo
-import play.api.libs.ws.WS
 import play.api.mvc._
+
 import scala.concurrent.ExecutionContext.Implicits.global
+import services.{SunService, WeatherService}
+
+
+//import java.util.concurrent.TimeUndit
+//
+//import actors.StatsActor
+//import akka.actor.ActorSystem
+//import akka.util.Timeout
+//import model.{CombinedData, SunInfo}
+//import org.joda.time.{DateTimeZone, DateTime}
+//import org.joda.time.format.DateTimeFormat
+//import play.api.libs.json.Json
+//import play.api.libs.ws.WS
+//import play.api.mvc._
+//
+//
+//import play.api.Play.current
+//import services.{UserAuthAction, AuthService, WeatherService, SunService}
+//import scala.concurrent.ExecutionContext.Implicits.global
+
+import play.api.data.Form
+import play.api.data.Forms._
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
  * application's home page.
  */
 @Singleton
-class HomeController @Inject() extends Controller {
+class HomeController @Inject() (weatherService: WeatherService, sunService: SunService, actorSystem: ActorSystem) extends Controller {
 
   /**
    * Create an Action to render an HTML page with a welcome message.
@@ -23,14 +48,20 @@ class HomeController @Inject() extends Controller {
    * a path of `/`.
    */
   def index = Action.async {
-    val responseF = WS.url(http://api.sunrise-sunset.org/json?"+
-    "lat=-33.8830&lng=151.2167&formatted=0").get()
-    responseF.map { response =>
-      val json = response.json
-      val sunriseTimeStr = (json \ "results" \ "sunrise").as[String]
-      val sunsetTimeStr = (json \ "results" \ "sunset").as[String]
-      val sunInfo = SunInfo(sunriseTimeStr, sunsetTimeStr)
-      Ok(views.html.index(sunInfo))
+    val lat = 32.06
+    val lon = 118.78
+
+    val sunInfoF = sunService.getSunInfo(lat, lon)
+    val temperatureF = weatherService.getTemperature(lat, lon)
+    implicit val timeout = Timeout(5, TimeUnit.SECONDS)
+    val requestsF = (actorSystem.actorSelection(StatsActor.path) ?
+      StatsActor.GetStats).mapTo[Int]
+    for {
+      sunInfo <- sunInfoF
+      temperature <- temperatureF
+      requests <- requestsF
+    } yield {
+      Ok(views.html.index(sunInfo, temperature, requests))
     }
   }
 }

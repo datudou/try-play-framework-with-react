@@ -43,6 +43,7 @@ bin/
 /logs/
 /modules
 /project/target
+.sbtserver
 /target
 tmp/
 test-result
@@ -50,3 +51,6 @@ server.pid
 *.eml
 /dist/
 .cache
+
+
+.sbt
