@@ -54,3 +54,6 @@ server.pid
 
 
 .sbt
+
+### nodejs ###
+node_modules
