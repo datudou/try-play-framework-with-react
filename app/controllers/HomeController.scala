@@ -7,7 +7,9 @@ import actors.StatsActor
 import akka.actor.ActorSystem
 import akka.util.Timeout
 import akka.pattern.ask
+import model.CombinedData
 import play.api._
+import play.api.libs.json.Json
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -47,7 +49,11 @@ class HomeController @Inject() (weatherService: WeatherService, sunService: SunS
    * will be called when the application receives a `GET` request with
    * a path of `/`.
    */
-  def index = Action.async {
+  def index = Action {
+    Ok(views.html.index())
+  }
+
+  def data = Action.async {
     val lat = 32.06
     val lon = 118.78
 
@@ -61,7 +67,7 @@ class HomeController @Inject() (weatherService: WeatherService, sunService: SunS
       temperature <- temperatureF
       requests <- requestsF
     } yield {
-      Ok(views.html.index(sunInfo, temperature, requests))
+      Ok(Json.toJson(CombinedData(sunInfo, temperature ,requests)))
     }
   }
 }

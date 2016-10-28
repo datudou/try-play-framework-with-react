@@ -57,3 +57,6 @@ server.pid
 
 ### nodejs ###
 node_modules
+public/compiled
+
+
