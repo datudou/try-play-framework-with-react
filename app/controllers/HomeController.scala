@@ -53,6 +53,7 @@ class HomeController @Inject() (weatherService: WeatherService, sunService: SunS
     Ok(views.html.index())
   }
 
+
   def data = Action.async {
     val lat = 32.06
     val lon = 118.78

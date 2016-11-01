@@ -15,6 +15,7 @@ import play.api.libs.ws.ahc.{AhcConfigBuilder, AhcWSComponents}
 import services.{SunService, WeatherService}
 import filters.StatsFilter
 import play.api.mvc._
+import scalikejdbc.config.DBs
 
 import scala.concurrent.Future
 
@@ -28,7 +29,7 @@ class AppApplicationLoader extends ApplicationLoader{
   }
 }
 
-trait AppComponents extends BuiltInComponents with AhcWSComponents{
+trait AppComponents extends BuiltInComponents with AhcWSComponents with Ev{
   lazy val assets: Assets = wire[Assets]
   lazy val prefix: String = "/"
   lazy val router: Router = wire[Routes]
@@ -42,8 +43,19 @@ trait AppComponents extends BuiltInComponents with AhcWSComponents{
   lazy val statsActor = actorSystem.actorOf(
     Props(wire[StatsActor]), StatsActor.name)
 
+  applicationLifecycle.addStopHook{()=>
+    Logger.info("The app is about to stop")
+    DBs.closeAll()
+    Future.successful(Unit)
+  }
+
   val onStart = {
     Logger.info("The app is about to start")
+    DBs.setupAll()
     statsActor ! Ping
   }
+
+
+
+
  }
