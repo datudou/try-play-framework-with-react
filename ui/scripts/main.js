@@ -1,4 +1,8 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import SunWeatherComponent from './WeatherComponent.jsx';
-ReactDOM.render(<SunWeatherComponent />, document.getElementById('reactView'));
+import React from 'react'
+import ReactDOM from 'react-dom'
+import makeMainRoutes from '../views/routes'
+import {Route} from 'react-router'
+import Bootstrap from 'bootstrap/dist/css/bootstrap.css';
+
+
+ReactDOM.render(makeMainRoutes(), document.getElementById('reactView'));

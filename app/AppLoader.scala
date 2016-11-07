@@ -29,7 +29,7 @@ class AppApplicationLoader extends ApplicationLoader{
   }
 }
 
-trait AppComponents extends BuiltInComponents with AhcWSComponents with Ev{
+trait AppComponents extends BuiltInComponents with AhcWSComponents {
   lazy val assets: Assets = wire[Assets]
   lazy val prefix: String = "/"
   lazy val router: Router = wire[Routes]
